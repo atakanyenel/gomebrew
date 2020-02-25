@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	COMMAND_POS = 1
-	PACKAGE_POS = 2
-	homebrewAPI = "https://formulae.brew.sh/api/formula/%s.json"
-	GomeSymPath = "/usr/local/bin/gome-%s"
+	COMMAND_POS        = 1
+	PACKAGE_POS        = 2
+	homebrewAPI        = "https://formulae.brew.sh/api/formula/%s.json"
+	GomeSymPath        = "/usr/local/bin/gome-%s"
+	GomeManPageSymPath = "/usr/local/share/man/man1/gome-%s.1"
 )
 
 var packagesDir string

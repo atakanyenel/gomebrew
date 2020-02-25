@@ -52,20 +52,6 @@ func Test_untarFile(t *testing.T) {
 
 }
 
-func Test_createSymlink(t *testing.T) {
-	f := formula{
-		Name:     "upx",
-		Desc:     "Compress/expand executable files",
-		Homepage: "https://upx.github.io/",
-		Versions: version{
-			Stable: "3.96",
-		},
-	}
-	if err := f.createSymLink(); err != nil {
-		fmt.Println(err)
-	}
-}
-
 func Test_isInstalled(t *testing.T) {
 	f := formula{
 		Name:     "shouldnt_be_installed",

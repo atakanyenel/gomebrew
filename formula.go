@@ -53,7 +53,14 @@ func (f formula) install(tarLocation string) error {
 	os.Remove(tarLocation)
 
 	// now we only have uncompressed file
-	return f.createSymLink()
+	execPath := f.getExecutable()
+	destination := fmt.Sprintf(GomeSymPath, f.Name)
+	f.createSymLink(execPath, destination)
+	manPage := f.getManpage()
+	destination = fmt.Sprintf(GomeManPageSymPath, f.Name)
+	f.createSymLink(manPage, destination)
+
+	return nil
 }
 
 func (f formula) String() string {
@@ -87,19 +94,17 @@ func (f formula) isInstalled() bool {
 	return true
 }
 
-func (f formula) createSymLink() error {
+func (f formula) createSymLink(localPath, destination string) error {
 
-	execPath := f.getExecutable()
-	if _, err := os.Stat(execPath); os.IsNotExist(err) { //check executable exists
+	if _, err := os.Stat(localPath); os.IsNotExist(err) { //check file exists
 		return err
 	}
 
-	destination := fmt.Sprintf(GomeSymPath, f.Name)
 	if _, err := os.Lstat(destination); err == nil { //if symlink exists, gives error
 		os.Remove(destination)
 	}
-	log.Printf("Creating symlink: %s --> %s", execPath, destination)
-	err := os.Symlink(execPath, destination)
+	log.Printf("Creating symlink: %s --> %s", localPath, destination)
+	err := os.Symlink(localPath, destination)
 	return err
 }
 
@@ -121,6 +126,17 @@ func (f formula) getExecutable() string {
 	}
 
 	return fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, installedVersion, f.Name)
+
+}
+
+func (f formula) getManpage() string {
+	//ln -s  ~/Desktop/Computer_Science/go/src/github.com/atakanyenel/gomebrew/gome_packages/tree/1.8.0/share/man/man1/tree.1  /usr/local/share/man/man1/gome-tree.1
+	installedVersion := f.Versions.Stable
+	if f.Linked_keg != "" {
+		installedVersion = f.Linked_keg
+	}
+
+	return fmt.Sprintf("%s/%s/%s/share/man/man1/%s.1", packagesDir, f.Name, installedVersion, f.Name) //too many hardcoded values maybe error here
 
 }
 
