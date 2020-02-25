@@ -45,8 +45,8 @@ Upgrades program if new version is available. If `<program>` is omitted, upgrade
 
 Removes program from the `gome_packages` folder and deletes the symlink.
 
-### Purge
-`gomebrew purge`
+### Prune
+`gomebrew prune`
 
 Removes `gome_packages` folder and deletes symlinks.
 

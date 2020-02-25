@@ -33,8 +33,8 @@ func main() {
 	case "upgrade":
 		programs := os.Args[PACKAGE_POS:]
 		upgrade(programs)
-	case "purge":
-		purge()
+	case "prune":
+		prune()
 	default:
 		if fun, ok := commandToFunc[command]; ok {
 			programs := os.Args[PACKAGE_POS:]

@@ -114,6 +114,11 @@ func (f formula) uninstall() {
 	if _, err := os.Lstat(destination); err == nil {
 		os.Remove(destination) //remove symlink
 	}
+
+	destination = fmt.Sprintf(GomeManPageSymPath, f.Name)
+	if _, err := os.Lstat(destination); err == nil {
+		os.Remove(destination) //remove man page symlink
+	}
 	packagePath := fmt.Sprintf("%s/%s", packagesDir, f.Name)
 	err := os.RemoveAll(packagePath) //remove gome_package folder
 	check(err)

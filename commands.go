@@ -59,7 +59,7 @@ func upgrade(programs []string) {
 	}
 }
 
-func purge() {
+func prune() {
 	for _, current := range getInstalledFormulas() {
 		current.uninstall()
 	}
