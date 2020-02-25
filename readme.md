@@ -31,7 +31,7 @@ lists installed programs in `gome_packages` folder.
 
 `gomebrew info <program>`
 
-prints returned json from API request to homebrew. Info is independent from locally installed packages.
+prints returned json from API request to homebrew.
 
 ### Upgrade
 

@@ -10,7 +10,7 @@ import (
 
 func Test_formula_String(t *testing.T) {
 	f := formula{
-		Name:     "test",
+		Name:     "tree",
 		Desc:     "a test package",
 		Homepage: "https://test.sh",
 		Versions: version{
@@ -61,11 +61,11 @@ func Test_isInstalled(t *testing.T) {
 			Stable: "3.96",
 		},
 	}
-	if f.isInstalled() {
+	if f.IsInstalled() {
 		t.Fatalf(f.Name)
 	}
 	f.Name = "hugo"
-	if true == f.isInstalled() {
+	if true == f.IsInstalled() {
 		t.Fatalf(f.Name)
 	}
 

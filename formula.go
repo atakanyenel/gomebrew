@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"text/template"
 )
 
 type version struct {
@@ -55,16 +57,31 @@ func (f formula) install(tarLocation string) error {
 	// now we only have uncompressed file
 	execPath := f.getExecutable()
 	destination := fmt.Sprintf(GomeSymPath, f.Name)
-	f.createSymLink(execPath, destination)
+	check(f.createSymLink(execPath, destination))
 	manPage := f.getManpage()
 	destination = fmt.Sprintf(GomeManPageSymPath, f.Name)
-	f.createSymLink(manPage, destination)
+	check(f.createSymLink(manPage, destination))
 
 	return nil
 }
 
 func (f formula) String() string {
-	return fmt.Sprintf("%s -> %s\nVersion: %s\nHomepage: %s", f.Name, f.Desc, f.Versions.Stable, f.Homepage)
+	output := `
+---
+{{.Name}}
+Desc: {{.Desc}}
+Version: {{.Versions.Stable}}
+Homepage: {{.Homepage}}
+IsInstalled: {{ .IsInstalled }}
+---
+`
+	tmpl, err := template.New("info").Parse(output)
+	check(err)
+	var tpl bytes.Buffer
+	check(tmpl.Execute(&tpl, f))
+
+	return tpl.String()
+	//	return fmt.Sprintf("%s -> %s\nVersion: %s\nHomepage: %s\nIsinstalled: %v", f.Name, f.Desc, f.Versions.Stable, f.Homepage, f.isInstalled())
 }
 
 func (f formula) getMacOSVersion() fileUrl {
@@ -83,7 +100,7 @@ func (f formula) getMacOSVersion() fileUrl {
 	return fileUrl{}
 }
 
-func (f formula) isInstalled() bool {
+func (f formula) IsInstalled() bool {
 
 	if _, err := exec.LookPath("gome-" + f.Name); err != nil {
 		return false

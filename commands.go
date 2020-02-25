@@ -9,7 +9,7 @@ import (
 func install(program string) {
 	log.Printf("install called with %s", program)
 
-	if (formula{Name: program}.isInstalled()) {
+	if (formula{Name: program}.IsInstalled()) {
 		log.Fatalf("%s is already installed", program)
 	}
 
