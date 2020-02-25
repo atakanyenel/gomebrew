@@ -16,8 +16,8 @@ func install(program string) {
 	f, err := getFormula(program)
 	check(err)
 
-	if len(f.Dependencies) != 0 || f.Revision != 0 {
-		log.Println("Gomebrew currently does not support dependencies or packages with revisions")
+	if len(f.Dependencies) != 0 {
+		log.Println("Gomebrew currently does not support packages with dependencies")
 		return // don't fail, so other arguments can continue
 	}
 	tarLocation := f.download()

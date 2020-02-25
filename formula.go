@@ -18,7 +18,7 @@ type formula struct {
 	Name         string
 	Desc         string
 	Homepage     string
-	Revision     int
+	Linked_keg   string
 	Dependencies []string
 	Versions     version
 	Bottle       struct {
@@ -88,7 +88,8 @@ func (f formula) isInstalled() bool {
 }
 
 func (f formula) createSymLink() error {
-	execPath := fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, f.Versions.Stable, f.Name)
+
+	execPath := f.getExecutable()
 	if _, err := os.Stat(execPath); os.IsNotExist(err) { //check executable exists
 		return err
 	}
@@ -111,4 +112,14 @@ func (f formula) uninstall() {
 	packagePath := fmt.Sprintf("%s/%s", packagesDir, f.Name)
 	err := os.RemoveAll(packagePath) //remove gome_package folder
 	check(err)
+}
+
+func (f formula) getExecutable() string {
+	installedVersion := f.Versions.Stable
+	if f.Linked_keg != "" {
+		installedVersion = f.Linked_keg
+	}
+
+	return fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, installedVersion, f.Name)
+
 }
