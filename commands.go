@@ -13,7 +13,7 @@ func install(program string) {
 		log.Fatalf("%s is already installed", program)
 	}
 
-	f, err := getFormula(program)
+	f, err := getUpstreamFormula(program)
 	check(err)
 
 	if len(f.Dependencies) != 0 {
@@ -33,7 +33,7 @@ func list() {
 
 func info(program string) {
 	log.Printf("info called with %s", program)
-	if f, err := getFormula(program); err == nil {
+	if f, err := getUpstreamFormula(program); err == nil {
 		fmt.Print(f)
 	}
 }
@@ -42,17 +42,19 @@ func uninstall(program string) {
 	formula{Name: program}.uninstall()
 }
 
-func upgrade() {
+func upgrade(programs []string) {
 	formulas := getInstalledFormulas()
-
-	for _, current := range formulas {
-		upstream, err := getFormula(current.Name)
-		check(err)
-		if upstream.Versions.Stable == current.Versions.Stable {
-			log.Printf("%s is already the latest version: %s", current.Name, current.Versions.Stable)
-		} else {
-			tarLocation := upstream.download()
-			check(upstream.install(tarLocation))
+	if len(programs) == 0 {
+		for _, current := range formulas {
+			current.updateExecutable()
+		}
+	} else {
+		for _, current := range programs {
+			if f, ok := formulas[current]; ok {
+				f.updateExecutable()
+			} else {
+				log.Printf("%s is not installed", current)
+			}
 		}
 	}
 }

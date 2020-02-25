@@ -123,3 +123,14 @@ func (f formula) getExecutable() string {
 	return fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, installedVersion, f.Name)
 
 }
+
+func (f formula) updateExecutable() {
+	upstream, err := getUpstreamFormula(f.Name)
+	check(err)
+	if upstream.Versions.Stable == f.Versions.Stable {
+		log.Printf("%s is already the latest version: %s", f.Name, f.Versions.Stable)
+	} else {
+		tarLocation := upstream.download()
+		check(upstream.install(tarLocation))
+	}
+}

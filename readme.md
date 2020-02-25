@@ -35,9 +35,9 @@ prints returned json from API request to homebrew. Info is independent from loca
 
 ### Upgrade
 
-`gomebrew upgrade`
+`gomebrew upgrade <program>`
 
-Checks all installed programs and upgrades them if a new version is available.
+Upgrades program if new version is available. If `<program>` is omitted, upgrades all programs.
 
 ### Uninstall
 

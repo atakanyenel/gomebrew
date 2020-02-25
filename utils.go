@@ -18,7 +18,7 @@ func check(err error) {
 	}
 }
 
-func getFormula(packageName string) (formula, error) {
+func getUpstreamFormula(packageName string) (formula, error) {
 	log.Printf("getFormula called with %s", packageName)
 	apiURL := fmt.Sprintf(homebrewAPI, packageName)
 	log.Printf("Sending request to %s", apiURL)
@@ -32,7 +32,8 @@ func getFormula(packageName string) (formula, error) {
 	return f, err
 }
 
-func getInstalledFormulas() (formulas []formula) {
+func getInstalledFormulas() map[string]formula {
+	formulas := map[string]formula{}
 	files, _ := filepath.Glob(packagesDir + "/*/*")
 	for _, f := range files {
 		program, v := filepath.Split(f)
@@ -42,8 +43,7 @@ func getInstalledFormulas() (formulas []formula) {
 			Name:     program,
 			Versions: version{Stable: v},
 		}
-
-		formulas = append(formulas, installedFormula)
+		formulas[program] = installedFormula
 	}
 	return formulas
 }

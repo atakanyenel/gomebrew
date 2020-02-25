@@ -30,7 +30,8 @@ func main() {
 	case "list":
 		list()
 	case "upgrade":
-		upgrade()
+		programs := os.Args[PACKAGE_POS:]
+		upgrade(programs)
 	case "purge":
 		purge()
 	default:
