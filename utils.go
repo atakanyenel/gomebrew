@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func check(err error) {
@@ -40,8 +41,9 @@ func getInstalledFormulas() map[string]formula {
 		program = filepath.Base(program)
 
 		installedFormula := formula{
-			Name:     program,
-			Versions: version{Stable: v},
+			Name:       program,
+			Versions:   version{Stable: strings.Split(v, "_")[0]},
+			Linked_keg: v,
 		}
 		formulas[program] = installedFormula
 	}
