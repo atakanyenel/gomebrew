@@ -56,6 +56,6 @@ Removes `gome_packages` folder and deletes symlinks.
 
  - Does not support self-build. *Homebrew* has a DSL for installation instructions and `gomebrew` probably won't support this.
 
- - Does not work with `manpages` for now.
+ - It works with manpages for simple cases.
 
  - There is no caching.
