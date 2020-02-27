@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -72,4 +73,23 @@ func untarFile(filepath string) error {
 	_, err := exec.Command("bash", "-c", fmt.Sprintf("tar xvzf %s -C %s", filepath, packagesDir)).Output()
 	return err
 
+}
+
+func handleSymLink(localPath, destination string, action int) error {
+
+	if _, err := os.Lstat(destination); err == nil { //if symlink exists, gives delete it
+		os.Remove(destination)
+	}
+
+	if action == SymlinkResources {
+
+		if _, err := os.Stat(localPath); os.IsNotExist(err) { //check file exists
+			return err
+		}
+		log.Printf("Creating symlink: %s --> %s", localPath, destination)
+		err := os.Symlink(localPath, destination)
+		return err
+	} //no need for deletesymlink as it's always done first
+
+	return nil
 }

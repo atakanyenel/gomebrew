@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	homebrewAPI        = "https://formulae.brew.sh/api/formula/%s.json"
-	GomeSymPath        = "/usr/local/bin/gome-%s"
-	GomeManPageSymPath = "/usr/local/share/man/man1/gome-%s.1"
+	homebrewAPI = "https://formulae.brew.sh/api/formula/%s.json"
+	GomeSymPath = "/usr/local/bin/gome-%s"
 )
 
 var packagesDir string

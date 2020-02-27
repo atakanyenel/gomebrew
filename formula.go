@@ -6,7 +6,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"text/template"
+)
+
+const (
+	DeleteResources = iota
+	SymlinkResources
 )
 
 type version struct {
@@ -55,12 +61,8 @@ func (f formula) install(tarLocation string) error {
 	os.Remove(tarLocation)
 
 	// now we only have uncompressed file
-	execPath := f.getExecutable()
-	destination := fmt.Sprintf(GomeSymPath, f.Name)
-	check(f.createSymLink(execPath, destination))
-	manPage := f.getManpage()
-	destination = fmt.Sprintf(GomeManPageSymPath, f.Name)
-	check(f.createSymLink(manPage, destination))
+	f.handleExecutable(SymlinkResources)
+	f.handleShareResource(SymlinkResources)
 
 	return nil
 }
@@ -72,7 +74,7 @@ func (f formula) String() string {
 Desc: {{.Desc}}
 Version: {{.Versions.Stable}}
 Homepage: {{.Homepage}}
-IsInstalled: {{ .IsInstalled }}
+IsInstalled: {{ if .IsInstalled }}✅{{else}}❌{{end}}
 ---
 `
 	tmpl, err := template.New("info").Parse(output)
@@ -81,7 +83,6 @@ IsInstalled: {{ .IsInstalled }}
 	check(tmpl.Execute(&tpl, f))
 
 	return tpl.String()
-	//	return fmt.Sprintf("%s -> %s\nVersion: %s\nHomepage: %s\nIsinstalled: %v", f.Name, f.Desc, f.Versions.Stable, f.Homepage, f.isInstalled())
 }
 
 func (f formula) getMacOSVersion() fileUrl {
@@ -111,54 +112,23 @@ func (f formula) IsInstalled() bool {
 	return true
 }
 
-func (f formula) createSymLink(localPath, destination string) error {
-
-	if _, err := os.Stat(localPath); os.IsNotExist(err) { //check file exists
-		return err
-	}
-
-	if _, err := os.Lstat(destination); err == nil { //if symlink exists, gives error
-		os.Remove(destination)
-	}
-	log.Printf("Creating symlink: %s --> %s", localPath, destination)
-	err := os.Symlink(localPath, destination)
-	return err
-}
-
 func (f formula) uninstall() {
 	log.Printf("uninstall called with %s", f.Name)
-	destination := fmt.Sprintf(GomeSymPath, f.Name)
-	if _, err := os.Lstat(destination); err == nil {
-		os.Remove(destination) //remove symlink
-	}
 
-	destination = fmt.Sprintf(GomeManPageSymPath, f.Name)
-	if _, err := os.Lstat(destination); err == nil {
-		os.Remove(destination) //remove man page symlink
-	}
+	f.handleExecutable(DeleteResources)
+	f.handleShareResource(DeleteResources)
+
 	packagePath := fmt.Sprintf("%s/%s", packagesDir, f.Name)
 	err := os.RemoveAll(packagePath) //remove gome_package folder
 	check(err)
 }
 
-func (f formula) getExecutable() string {
-	installedVersion := f.Versions.Stable
-	if f.Linked_keg != "" {
-		installedVersion = f.Linked_keg
-	}
+func (f formula) handleExecutable(action int) {
 
-	return fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, installedVersion, f.Name)
+	execPath := fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, f.getRealLocation(), f.Name)
+	destination := fmt.Sprintf(GomeSymPath, f.Name)
 
-}
-
-func (f formula) getManpage() string {
-	//ln -s  ~/Desktop/Computer_Science/go/src/github.com/atakanyenel/gomebrew/gome_packages/tree/1.8.0/share/man/man1/tree.1  /usr/local/share/man/man1/gome-tree.1
-	installedVersion := f.Versions.Stable
-	if f.Linked_keg != "" {
-		installedVersion = f.Linked_keg
-	}
-
-	return fmt.Sprintf("%s/%s/%s/share/man/man1/%s.1", packagesDir, f.Name, installedVersion, f.Name) //too many hardcoded values maybe error here
+	handleSymLink(execPath, destination, action)
 
 }
 
@@ -170,5 +140,45 @@ func (f formula) updateExecutable() {
 	} else {
 		tarLocation := upstream.download()
 		check(upstream.install(tarLocation))
+	}
+}
+
+func (f formula) handleShareResource(action int) error {
+
+	r := fmt.Sprintf("%s/%s/%s/share/", packagesDir, f.Name, f.getRealLocation())
+
+	if _, err := os.Stat(r); os.IsNotExist(err) { //check file exists
+		return err
+	}
+	type resource struct {
+		realLocation    string
+		symLinkLocation string
+	}
+	shareResources := []resource{}
+	filepath.Walk(r, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			rel, _ := filepath.Rel(r, path)
+
+			g := filepath.Join("/usr/local/share/", rel)
+
+			updatedLocation := filepath.Join(filepath.Dir(g), fmt.Sprintf("gome-%s", filepath.Base(g)))
+			shareResources = append(shareResources, resource{path, updatedLocation})
+
+		}
+		return nil
+	})
+
+	for _, r := range shareResources {
+		handleSymLink(r.realLocation, r.symLinkLocation, action)
+	}
+
+	return nil
+}
+
+func (f formula) getRealLocation() string {
+	if f.Linked_keg != "" {
+		return f.Linked_keg
+	} else {
+		return f.Versions.Stable
 	}
 }

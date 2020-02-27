@@ -52,10 +52,8 @@ Removes `gome_packages` folder and deletes symlinks.
 
 ## Issues
 
-- Currently only works with standalone programs. If a program has a dependency `gomebrew` will simply exit.
+- Currently only works with standalone programs. If a program has a dependency, `gomebrew` will simply exit.
 
- - Does not support self-build. *Homebrew* has a DSL for installation instructions and `gomebrew` probably won't support this.
+- Does not support self-build. *Homebrew* has a DSL for installation instructions and `gomebrew` probably won't support this.
 
- - It works with manpages for simple cases.
-
- - There is no caching.
+- There is no caching.

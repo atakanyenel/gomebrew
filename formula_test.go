@@ -85,3 +85,14 @@ func Test_glob(t *testing.T) {
 		fmt.Println(f)
 	}
 }
+
+func Test_betterManPages(t *testing.T) {
+	f := formula{Name: "wget",
+		Linked_keg: "1.20.3_2",
+		Versions: version{
+			Stable: "1.20.3",
+		},
+	}
+	f.handleShareResource(DeleteResources)
+
+}
