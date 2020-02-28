@@ -93,6 +93,6 @@ func Test_betterManPages(t *testing.T) {
 			Stable: "1.20.3",
 		},
 	}
-	f.handleShareResource(DeleteResources)
+	f.handleSymlinks(DeleteResources)
 
 }

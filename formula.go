@@ -60,9 +60,8 @@ func (f formula) install(tarLocation string) error {
 	//delete tar
 	os.Remove(tarLocation)
 
+	f.handleSymlinks(SymlinkResources)
 	// now we only have uncompressed file
-	f.handleExecutable(SymlinkResources)
-	f.handleShareResource(SymlinkResources)
 
 	return nil
 }
@@ -115,21 +114,11 @@ func (f formula) IsInstalled() bool {
 func (f formula) uninstall() {
 	log.Printf("uninstall called with %s", f.Name)
 
-	f.handleExecutable(DeleteResources)
-	f.handleShareResource(DeleteResources)
+	f.handleSymlinks(DeleteResources)
 
 	packagePath := fmt.Sprintf("%s/%s", packagesDir, f.Name)
 	err := os.RemoveAll(packagePath) //remove gome_package folder
 	check(err)
-}
-
-func (f formula) handleExecutable(action int) {
-
-	execPath := fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, f.getRealLocation(), f.Name)
-	destination := fmt.Sprintf(GomeSymPath, f.Name)
-
-	handleSymLink(execPath, destination, action)
-
 }
 
 func (f formula) updateExecutable() {
@@ -143,18 +132,24 @@ func (f formula) updateExecutable() {
 	}
 }
 
-func (f formula) handleShareResource(action int) error {
+func (f formula) handleSymlinks(action int) error {
+
+	execPath := fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, f.getRealLocation(), f.Name)
+	destination := fmt.Sprintf(GomeSymPath, f.Name)
+
+	type resource struct {
+		realLocation    string
+		symLinkLocation string
+	}
+	//add executable to resources
+	shareResources := []resource{{execPath, destination}}
 
 	r := fmt.Sprintf("%s/%s/%s/share/", packagesDir, f.Name, f.getRealLocation())
 
 	if _, err := os.Stat(r); os.IsNotExist(err) { //check file exists
 		return err
 	}
-	type resource struct {
-		realLocation    string
-		symLinkLocation string
-	}
-	shareResources := []resource{}
+
 	filepath.Walk(r, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			rel, _ := filepath.Rel(r, path)
@@ -178,7 +173,6 @@ func (f formula) handleShareResource(action int) error {
 func (f formula) getRealLocation() string {
 	if f.Linked_keg != "" {
 		return f.Linked_keg
-	} else {
-		return f.Versions.Stable
 	}
+	return f.Versions.Stable
 }
