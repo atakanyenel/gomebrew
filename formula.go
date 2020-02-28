@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -12,7 +11,7 @@ import (
 
 const (
 	DeleteResources = iota
-	SymlinkResources
+	CreateResources
 )
 
 type version struct {
@@ -60,7 +59,7 @@ func (f formula) install(tarLocation string) error {
 	//delete tar
 	os.Remove(tarLocation)
 
-	f.handleSymlinks(SymlinkResources)
+	f.handleSymlinks(CreateResources)
 	// now we only have uncompressed file
 
 	return nil
@@ -116,7 +115,7 @@ func (f formula) uninstall() {
 
 	f.handleSymlinks(DeleteResources)
 
-	packagePath := fmt.Sprintf("%s/%s", packagesDir, f.Name)
+	packagePath := filepath.Join(packagesDir, f.Name)
 	err := os.RemoveAll(packagePath) //remove gome_package folder
 	check(err)
 }
@@ -134,8 +133,8 @@ func (f formula) updateExecutable() {
 
 func (f formula) handleSymlinks(action int) error {
 
-	execPath := fmt.Sprintf("%s/%s/%s/bin/%s", packagesDir, f.Name, f.getRealLocation(), f.Name)
-	destination := fmt.Sprintf(GomeSymPath, f.Name)
+	execPath := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "bin", f.Name)
+	destination := filepath.Join("/usr/local/bin", "gome-"+f.Name)
 
 	type resource struct {
 		realLocation    string
@@ -144,7 +143,7 @@ func (f formula) handleSymlinks(action int) error {
 	//add executable to resources
 	shareResources := []resource{{execPath, destination}}
 
-	r := fmt.Sprintf("%s/%s/%s/share/", packagesDir, f.Name, f.getRealLocation())
+	r := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "share")
 
 	if _, err := os.Stat(r); os.IsNotExist(err) { //check file exists
 		return err
@@ -156,7 +155,7 @@ func (f formula) handleSymlinks(action int) error {
 
 			g := filepath.Join("/usr/local/share/", rel)
 
-			updatedLocation := filepath.Join(filepath.Dir(g), fmt.Sprintf("gome-%s", filepath.Base(g)))
+			updatedLocation := filepath.Join(filepath.Dir(g), "gome-"+filepath.Base(g)) //add gome- to pages
 			shareResources = append(shareResources, resource{path, updatedLocation})
 
 		}

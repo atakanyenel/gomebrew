@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+const homebrewAPI = "https://formulae.brew.sh/api/formula/%s.json"
+
 func check(err error) {
 	if err != nil {
 		panic(err)
@@ -81,7 +83,7 @@ func handleSymLink(localPath, destination string, action int) error {
 		os.Remove(destination)
 	}
 
-	if action == SymlinkResources {
+	if action == CreateResources {
 
 		if _, err := os.Stat(localPath); os.IsNotExist(err) { //check file exists
 			return err

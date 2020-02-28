@@ -8,18 +8,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
-	homebrewAPI = "https://formulae.brew.sh/api/formula/%s.json"
-	GomeSymPath = "/usr/local/bin/gome-%s"
-)
-
 var packagesDir string
 
 func init() { //so that we have packagesDir already defined for tests
 	var err error
-	packagesDir, err = filepath.Abs("gome_packages")
+	ex, err := os.Executable()
+	packagesDir := filepath.Join(ex, "gome_packages")
 	check(err)
 	_ = os.Mkdir(packagesDir, os.ModePerm) //create folder if not there
+	log.Printf("Packages are in: %s", packagesDir)
 }
 
 func main() {
