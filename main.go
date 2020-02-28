@@ -10,16 +10,15 @@ import (
 
 var packagesDir string
 
-func init() { //so that we have packagesDir already defined for tests
-	var err error
+func main() {
+
 	ex, err := os.Executable()
-	packagesDir := filepath.Join(ex, "gome_packages")
 	check(err)
+	packagesDir = filepath.Join(filepath.Dir(ex), "gome_packages")
+
 	_ = os.Mkdir(packagesDir, os.ModePerm) //create folder if not there
 	log.Printf("Packages are in: %s", packagesDir)
-}
 
-func main() {
 	app := &cli.App{
 		Name:  "gomebrew",
 		Usage: "a lite homebrew client",

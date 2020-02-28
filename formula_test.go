@@ -87,6 +87,8 @@ func Test_glob(t *testing.T) {
 }
 
 func Test_betterManPages(t *testing.T) {
+	packagesDir, _ = filepath.Abs("gome_packages")
+
 	f := formula{Name: "wget",
 		Linked_keg: "1.20.3_2",
 		Versions: version{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -133,36 +134,41 @@ func (f formula) updateExecutable() {
 
 func (f formula) handleSymlinks(action int) error {
 
-	execPath := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "bin", f.Name)
-	destination := filepath.Join("/usr/local/bin", "gome-"+f.Name)
-
 	type resource struct {
 		realLocation    string
 		symLinkLocation string
 	}
 	//add executable to resources
-	shareResources := []resource{{execPath, destination}}
+	packageResources := []resource{}
 
-	r := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "share")
+	binPath := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "bin")
+	if executables, err := ioutil.ReadDir(binPath); err == nil {
+		for _, exe := range executables {
 
-	if _, err := os.Stat(r); os.IsNotExist(err) { //check file exists
+			destination := filepath.Join("/usr/local/bin", "gome-"+exe.Name())
+			packageResources = append(packageResources, resource{filepath.Join(binPath, exe.Name()), destination})
+		}
+	}
+
+	sharePath := filepath.Join(packagesDir, f.Name, f.getRealLocation(), "share")
+
+	if _, err := os.Stat(sharePath); os.IsNotExist(err) { //check file exists
 		return err
 	}
 
-	filepath.Walk(r, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(sharePath, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			rel, _ := filepath.Rel(r, path)
+			rel, _ := filepath.Rel(sharePath, path)
 
 			g := filepath.Join("/usr/local/share/", rel)
 
 			updatedLocation := filepath.Join(filepath.Dir(g), "gome-"+filepath.Base(g)) //add gome- to pages
-			shareResources = append(shareResources, resource{path, updatedLocation})
+			packageResources = append(packageResources, resource{path, updatedLocation})
 
 		}
 		return nil
 	})
-
-	for _, r := range shareResources {
+	for _, r := range packageResources {
 		handleSymLink(r.realLocation, r.symLinkLocation, action)
 	}
 
