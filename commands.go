@@ -16,9 +16,12 @@ func install(program string) {
 	f, err := getUpstreamFormula(program)
 	check(err)
 
-	if len(f.Dependencies) != 0 {
+	if f.hasRuntimeDependencies() {
 		log.Println("Gomebrew currently does not support packages with dependencies")
 		return // don't fail, so other arguments can continue
+	}
+	for _, dep := range f.Dependencies {
+		install(dep)
 	}
 	tarLocation := f.download()
 	check(f.install(tarLocation))

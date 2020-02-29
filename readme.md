@@ -31,7 +31,7 @@ lists installed programs in `gome_packages` folder.
 
 `gomebrew info <program>`
 
-prints returned json from API request to homebrew.
+prints returned json from API request to homebrew. Says whether it's installed.
 
 ### Upgrade
 
@@ -52,7 +52,7 @@ Removes `gome_packages` folder and deletes symlinks.
 
 ## Issues
 
-- Currently only works with standalone programs. If a program has a dependency, `gomebrew` will simply exit.
+- If a program has a runtime dependency, gomebrew won't install it. Nevertheless, it will install parent programs that has that dependency.
 
 - Does not support self-build. *Homebrew* has a DSL for installation instructions and `gomebrew` probably won't support this.
 

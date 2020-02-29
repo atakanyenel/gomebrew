@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -97,4 +98,50 @@ func Test_betterManPages(t *testing.T) {
 	}
 	f.handleSymlinks(DeleteResources)
 
+}
+
+func Test_runtimeDeps(t *testing.T) {
+	f, _ := getUpstreamFormula("wget")
+
+	if !f.hasRuntimeDependencies() {
+		fmt.Println(f.Name)
+		t.Fail()
+	}
+
+	f, _ = getUpstreamFormula("minikube")
+
+	if f.hasRuntimeDependencies() {
+		fmt.Println(f.Name)
+		t.Fail()
+	}
+	fmt.Printf("%+v", f.Installed)
+}
+func Test_install_deps(t *testing.T) {
+	file, _ := ioutil.ReadFile("scripts/formula.json")
+	data := []formula{}
+	if err := json.Unmarshal([]byte(file), &data); err != nil {
+		fmt.Println(err)
+	}
+
+	for _, k := range data {
+		if len(k.Dependencies) == 1 && !k.hasRuntimeDependencies() {
+			if k.Name == "minikube" {
+				fmt.Println(k.Name)
+			}
+			fmt.Println(k.Name)
+		}
+	}
+
+}
+
+func Test_recursiveInstall(t *testing.T) {
+	t_install("minikube")
+}
+func t_install(program string) {
+
+	g, _ := getUpstreamFormula(program)
+	fmt.Println(g.Name)
+	for _, k := range g.Dependencies {
+		t_install(k)
+	}
 }

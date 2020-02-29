@@ -1,4 +1,4 @@
 gome_packages
 gomebrew
 .DS_Store
-scripts/bsize.rb
+scripts/*

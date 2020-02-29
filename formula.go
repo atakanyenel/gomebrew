@@ -38,6 +38,12 @@ type formula struct {
 			}
 		}
 	}
+	Installed []struct {
+		Runtime_dependencies []struct {
+			Full_name string
+			Version   string
+		}
+	}
 }
 
 func (f formula) download() string {
@@ -180,4 +186,13 @@ func (f formula) getRealLocation() string {
 		return f.Linked_keg
 	}
 	return f.Versions.Stable
+}
+
+func (f formula) hasRuntimeDependencies() bool {
+	for _, i := range f.Installed {
+		if len(i.Runtime_dependencies) != 0 {
+			return true
+		}
+	}
+	return false
 }
