@@ -73,7 +73,7 @@ func (f formula) install(tarLocation string) error {
 }
 
 func (f formula) String() string {
-	output := `
+	const output = `
 ---
 {{.Name}}
 Desc: {{.Desc}}
@@ -82,8 +82,7 @@ Homepage: {{.Homepage}}
 IsInstalled: {{ if .IsInstalled }}✅{{else}}❌{{end}}
 ---
 `
-	tmpl, err := template.New("info").Parse(output)
-	check(err)
+	tmpl, _ := template.New("info").Parse(output)
 	var tpl bytes.Buffer
 	check(tmpl.Execute(&tpl, f))
 

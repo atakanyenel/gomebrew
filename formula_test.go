@@ -9,6 +9,16 @@ import (
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	code := m.Run()
+	teardown()
+	os.Exit(code)
+}
+
+func teardown() {
+	os.RemoveAll("upx-3.96.catalina.bottle.tar.gz")
+	os.RemoveAll("upx/")
+}
 func Test_formula_String(t *testing.T) {
 	f := formula{
 		Name:     "tree",
@@ -45,6 +55,7 @@ func Test_downloadFile(t *testing.T) {
 
 func Test_untarFile(t *testing.T) {
 
+	packagesDir = "."
 	filepath := "upx-3.96.catalina.bottle.tar.gz"
 	if err := untarFile(filepath); err != nil {
 		fmt.Println(err)
