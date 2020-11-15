@@ -35,6 +35,7 @@ type formula struct {
 				Catalina    fileUrl
 				Mojave      fileUrl
 				High_Sierra fileUrl
+				Big_Sur     fileUrl
 			}
 		}
 	}
@@ -95,6 +96,8 @@ func (f formula) getMacOSVersion() fileUrl {
 	version := string(out)[:5]
 	log.Printf("OS version is %s", version)
 	switch version {
+	case "11.0.":
+		return f.Bottle.Stable.Files.Big_Sur
 	case "10.15":
 		return f.Bottle.Stable.Files.Catalina
 	case "10.14":
